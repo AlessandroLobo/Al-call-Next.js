@@ -4,6 +4,10 @@ import { Container, Form, FormError, Header } from './styles' // Importing style
 import { useForm } from 'react-hook-form' // Importing useForm hook from react-hook-form
 import { z } from 'zod' // Importing zod for data validation
 import { zodResolver } from '@hookform/resolvers/zod' // Importing zodResolver from hookform resolvers
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
+import { api } from '@/lib/axios'
+import { AxiosError } from 'axios'
 
 // Defining the schema for the registration form using zod
 const registerFormSchema = z.object({
@@ -24,14 +28,36 @@ export default function Register() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerFormSchema), // Using zodResolver to validate the form data
   })
 
+  const router = useRouter()
+
+  useEffect(() => {
+    if (router.query.username) {
+      setValue('username', String(router.query.username))
+    }
+  }, [router.query?.username, setValue])
+
   // Function to handle form submission
   async function handleRegister(data: RegisterFormData) {
-    console.log(data) // Logging the form data to the console
+    try {
+      await api.post('/users', {
+        name: data.name,
+        username: data.username,
+      })
+
+      await router.push('/register/connect-calendar')
+    } catch (err) {
+      if (err instanceof AxiosError && err?.response?.data?.message) {
+        alert(err.response.data.message)
+        return
+      }
+      console.log(err)
+    }
   }
 
   // Rendering the registration form

@@ -36,7 +36,7 @@ export function ClaimUsernameForm() {
     const { username } = data
 
     // Redirect to the registration page with the reserved username
-    router.push(`/register?username=${username}`)
+    await router.push(`/register?username=${username}`)
   }
 
   return (
