@@ -15,6 +15,7 @@ model User {
   id         String   @id @default(uuid()) //informa que é o campo de id e sera gerado automaticamente
   username   String   @unique
   name       String
+  bio        String?
   email      String?  @unique
   avatar_url String?
   created_at DateTime @default(now())
