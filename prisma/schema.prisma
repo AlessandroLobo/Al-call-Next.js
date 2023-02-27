@@ -10,12 +10,62 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Cada vez que ouver um usuario autenticado ou não sera criado um usuario
 model User {
-  id       String @id @default(uuid()) //informa que é o campo de id e sera gerado automaticamente
-  username String @unique
-  name     String
-
+  id         String   @id @default(uuid()) //informa que é o campo de id e sera gerado automaticamente
+  username   String   @unique
+  name       String
+  email      String?  @unique
+  avatar_url String?
   created_at DateTime @default(now())
 
+  accounts      Account[]
+  sessions      Session[]
+  timeIntervals UserTimeInterval[]
+
   @@map("users")
+}
+
+// Integração do serviço de autenticacões com o usuario, podera ter varios providera para um usuario
+model Account {
+  id                  String  @id @default(cuid())
+  user_id             String
+  type                String
+  provider            String
+  provider_account_id String
+  refresh_token       String?
+  access_token        String?
+  expires_at          Int?
+  token_type          String?
+  scope               String?
+  id_token            String?
+  session_state       String?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([provider, provider_account_id])
+  @@map("accounts")
+}
+
+// Cada vez que o usuario fizer login em um computador diferente ele tera uma session
+model Session {
+  id            String   @id @default(cuid())
+  session_token String   @unique
+  user_id       String
+  expires       DateTime
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model UserTimeInterval {
+  id                    String @id @default(uuid())
+  week_day              Int
+  time_start_in_minutes Int
+  time_end_in_minutes   Int
+  user                  User   @relation(fields: [user_id], references: [id])
+  user_id               String
+
+  @@index([user_id])
+  @@map("user_time_intervals")
 }

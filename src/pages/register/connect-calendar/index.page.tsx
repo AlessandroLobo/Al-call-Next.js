@@ -1,5 +1,5 @@
 import { Button, Heading, MultiStep, Text } from '@ignite-ui/react'
-// import { signIn, useSession } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 // import { NextSeo } from 'next-seo'
 import { useRouter } from 'next/router'
 import { ArrowRight, Check } from 'phosphor-react'
@@ -8,14 +8,14 @@ import { Container, Header } from '../styles'
 import { AuthError, ConnectBox, ConnectItem } from './styles'
 
 export default function ConnectCalendar() {
-  // const session = useSession()
+  const session = useSession()
   const router = useRouter()
 
   const hasAuthError = !!router.query.error
-  // const isSignedId = session.status === 'authenticated'
+  const isSignedId = session.status === 'authenticated'
 
   async function handleConnectCalendar() {
-    // await signIn('google')
+    await signIn('google')
   }
 
   async function handleNavigateToNextStep() {
@@ -24,7 +24,7 @@ export default function ConnectCalendar() {
 
   return (
     <>
-      {/* <NextSeo title="Conecte sua agenda do Google | Ignite Call" noindex /> */}
+      {/* <NextSeo title="Conecte sua agenda do Google | Al Call" noindex /> */}
 
       <Container>
         <Header>
@@ -40,21 +40,21 @@ export default function ConnectCalendar() {
         <ConnectBox>
           <ConnectItem>
             <Text>Google Calendar</Text>
-            {/* {isSignedId ? ( */}
-            <Button size="sm" disabled>
-              Conectado
-              <Check />
-            </Button>
+            {isSignedId ? (
+              <Button size="sm" disabled>
+                Conectado
+                <Check />
+              </Button>
             ) : (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleConnectCalendar}
-            >
-              Conectar
-              <ArrowRight />
-            </Button>
-            )
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleConnectCalendar}
+              >
+                Conectar
+                <ArrowRight />
+              </Button>
+            )}
           </ConnectItem>
 
           {hasAuthError && (
@@ -67,7 +67,7 @@ export default function ConnectCalendar() {
           <Button
             onClick={handleNavigateToNextStep}
             type="submit"
-          // disabled={!isSignedId}
+            disabled={!isSignedId}
           >
             Próximo passo
             <ArrowRight />
