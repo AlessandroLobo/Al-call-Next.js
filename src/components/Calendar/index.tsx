@@ -1,4 +1,10 @@
-import { getWeekDays } from '@/utils/get-week-days'
+import { useQuery } from '@tanstack/react-query'
+import dayjs from 'dayjs'
+import { useRouter } from 'next/router'
+import { CaretLeft, CaretRight } from 'phosphor-react'
+import { useMemo, useState } from 'react'
+import { api } from '../../lib/axios'
+import { getWeekDays } from '../../utils/get-week-days'
 import {
   CalendarActions,
   CalendarBody,
@@ -7,12 +13,6 @@ import {
   CalendarHeader,
   CalendarTitle,
 } from './styles'
-import { CaretLeft, CaretRight } from 'phosphor-react'
-import { useMemo, useState } from 'react'
-import dayjs from 'dayjs'
-import { useQuery } from '@tanstack/react-query'
-import { useRouter } from 'next/router'
-import { api } from '@/lib/axios'
 
 interface CalendarWeek {
   week: number
@@ -35,22 +35,22 @@ interface CalendarProps {
 }
 
 export function Calendar({ selectedDate, onDateSelected }: CalendarProps) {
-  const [currentDate, setcurrentDate] = useState(() => {
+  const [currentDate, setCurrentDate] = useState(() => {
     return dayjs().set('date', 1)
   })
 
   const router = useRouter()
 
   function handlePreviousMonth() {
-    const previousMonthDate = currentDate.subtract(1, 'month')
+    const previousMonth = currentDate.subtract(1, 'month')
 
-    setcurrentDate(previousMonthDate)
+    setCurrentDate(previousMonth)
   }
 
   function handleNextMonth() {
-    const previousMonthDate = currentDate.add(1, 'month')
+    const nextMonth = currentDate.add(1, 'month')
 
-    setcurrentDate(previousMonthDate)
+    setCurrentDate(nextMonth)
   }
 
   const shortWeekDays = getWeekDays({ short: true })
@@ -66,17 +66,20 @@ export function Calendar({ selectedDate, onDateSelected }: CalendarProps) {
       const response = await api.get(`/users/${username}/blocked-dates`, {
         params: {
           year: currentDate.get('year'),
-          month: currentDate.get('month'),
+          month: currentDate.get('month') + 1,
         },
       })
 
       return response.data
     },
-    {
-      enabled: !!selectedDate,
-    },
   )
+
   const calendarWeeks = useMemo(() => {
+    if (!blockedDates) {
+      return []
+    }
+    console.log('calendarWeeks ~ blockedDates', blockedDates)
+
     const daysInMonthArray = Array.from({
       length: currentDate.daysInMonth(),
     }).map((_, i) => {
@@ -110,12 +113,13 @@ export function Calendar({ selectedDate, onDateSelected }: CalendarProps) {
         return { date, disabled: true }
       }),
       ...daysInMonthArray.map((date) => {
-        return (
-          {
-            date,
-            disabled: date.endOf('day').isBefore(new Date()),
-          } || blockedDates?.blockedWeekDays.includes(date.get('day'))
-        )
+        return {
+          date,
+          disabled:
+            date.endOf('day').isBefore(new Date()) ||
+            blockedDates.blockedWeekDays.includes(date.get('day')) ||
+            blockedDates.blockedDates.includes(date.get('date')),
+        }
       }),
       ...nextMonthFillArray.map((date) => {
         return { date, disabled: true }
@@ -132,6 +136,7 @@ export function Calendar({ selectedDate, onDateSelected }: CalendarProps) {
             days: original.slice(i, i + 7),
           })
         }
+
         return weeks
       },
       [],
@@ -146,6 +151,7 @@ export function Calendar({ selectedDate, onDateSelected }: CalendarProps) {
         <CalendarTitle>
           {currentMonth} <span>{currentYear}</span>
         </CalendarTitle>
+
         <CalendarActions>
           <button onClick={handlePreviousMonth} title="Previous month">
             <CaretLeft />
@@ -155,11 +161,12 @@ export function Calendar({ selectedDate, onDateSelected }: CalendarProps) {
           </button>
         </CalendarActions>
       </CalendarHeader>
+
       <CalendarBody>
         <thead>
           <tr>
-            {shortWeekDays.map((weeKday) => (
-              <th key={weeKday}>{weeKday}.</th>
+            {shortWeekDays.map((weekDay) => (
+              <th key={weekDay}>{weekDay}.</th>
             ))}
           </tr>
         </thead>
