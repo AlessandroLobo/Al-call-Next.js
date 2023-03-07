@@ -28,7 +28,7 @@ model User {
   @@map("users")
 }
 
-// Integração do serviço de autenticacões com o usuario, podera ter varios providera para um usuario
+// Integração do serviço de autenticacões com o usuario, podera ter varios provider para um usuario
 model Account {
   id                  String  @id @default(cuid())
   user_id             String

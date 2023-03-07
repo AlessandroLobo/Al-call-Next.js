@@ -1,3 +1,4 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Button,
   Checkbox,
@@ -6,8 +7,16 @@ import {
   Text,
   TextInput,
 } from '@ignite-ui/react'
+// import { NextSeo } from 'next-seo'
+import { useRouter } from 'next/router'
 import { ArrowRight } from 'phosphor-react'
+import { Controller, useFieldArray, useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { api } from '../../../lib/axios'
+import { convertTimeStringToMinutes } from '../../../utils/convert-time-string-to-minutes'
+import { getWeekDays } from '../../../utils/get-week-days'
 import { Container, Header } from '../styles'
+
 import {
   FormError,
   IntervalBox,
@@ -16,13 +25,6 @@ import {
   IntervalInputs,
   IntervalItem,
 } from './styles'
-import { Controller, useFieldArray, useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { getWeekDays } from '@/utils/get-week-days'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { convertTimeStringToMinutes } from '@/utils/convert-time-string-to-minutes'
-import { api } from '@/lib/axios'
-import { useRouter } from 'next/router'
 
 const timeIntervalsFormSchema = z.object({
   intervals: z
@@ -37,12 +39,12 @@ const timeIntervalsFormSchema = z.object({
     .length(7)
     .transform((intervals) => intervals.filter((interval) => interval.enabled))
     .refine((intervals) => intervals.length > 0, {
-      message: 'Você precisa selecionar pelo menos um dia da semana!',
+      message: 'Você precisa selecionar pelo menos um dia da semana',
     })
     .transform((intervals) => {
       return intervals.map((interval) => {
         return {
-          WeekDay: interval.weekDay,
+          weekDay: interval.weekDay,
           startTimeInMinutes: convertTimeStringToMinutes(interval.startTime),
           endTimeInMinutes: convertTimeStringToMinutes(interval.endTime),
         }
@@ -98,22 +100,24 @@ export default function TimeIntervals() {
 
   const intervals = watch('intervals')
 
-  async function handleSettimeIntervals(data: any) {
+  async function handleSetTimeIntervals(data: any) {
     const { intervals } = data as TimeIntervalsFormOutput
+    console.log(data)
 
     await api.post('/users/time-intervals', {
       intervals,
     })
+
     await router.push('/register/update-profile')
   }
 
   return (
     <>
-      {/* <NextSeo title="Conecte sua agenda do Google | Al Call" noindex /> */}
+      {/* <NextSeo title="Selecione sua disponibilidade | Ignite Call" noindex /> */}
 
       <Container>
         <Header>
-          <Heading as="strong">Conecte sua agenda!</Heading>
+          <Heading as="strong">Quase lá</Heading>
           <Text>
             Defina o intervalo de horário que você está disponível em cada dia
             da semana.
@@ -121,7 +125,8 @@ export default function TimeIntervals() {
 
           <MultiStep size={4} currentStep={3} />
         </Header>
-        <IntervalBox as="form" onSubmit={handleSubmit(handleSettimeIntervals)}>
+
+        <IntervalBox as="form" onSubmit={handleSubmit(handleSetTimeIntervals)}>
           <IntervalContainer>
             {fields.map((field, index) => {
               return (
@@ -133,9 +138,9 @@ export default function TimeIntervals() {
                       render={({ field }) => {
                         return (
                           <Checkbox
-                            onCheckedChange={(checked) => {
+                            onCheckedChange={(checked) =>
                               field.onChange(checked === true)
-                            }}
+                            }
                             checked={field.value}
                           />
                         )
