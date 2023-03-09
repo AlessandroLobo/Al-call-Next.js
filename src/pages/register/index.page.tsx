@@ -8,6 +8,7 @@ import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { api } from '@/lib/axios'
 import { AxiosError } from 'axios'
+import { NextSeo } from 'next-seo'
 
 // Defining the schema for the registration form using zod
 const registerFormSchema = z.object({
@@ -62,45 +63,48 @@ export default function Register() {
 
   // Rendering the registration form
   return (
-    <Container>
-      <Header>
-        <Heading as="strong">Welcome to Al Call</Heading>{' '}
-        {/* Using a Heading component from Ignite UI */}
-        <Text>
-          Please provide some information to create your profile. You can edit
-          this information later.
-        </Text>
-        <MultiStep size={4} currentStep={1} />{' '}
-        {/* Using a MultiStep component from Ignite UI */}
-      </Header>
+    <>
+      <NextSeo title="Crie uma conta | Al-Call" />
+      <Container>
+        <Header>
+          <Heading as="strong">Welcome to Al Call</Heading>{' '}
+          {/* Using a Heading component from Ignite UI */}
+          <Text>
+            Please provide some information to create your profile. You can edit
+            this information later.
+          </Text>
+          <MultiStep size={4} currentStep={1} />{' '}
+          {/* Using a MultiStep component from Ignite UI */}
+        </Header>
 
-      <Form as="form" onSubmit={handleSubmit(handleRegister)}>
-        <label>
-          <Text size="sm">Username</Text>{' '}
-          {/* Using a Text component from Ignite UI */}
-          <TextInput
-            prefix="alsystem.com/"
-            placeholder="your-username"
-            {...register('username')} // Using the register function to register the username input field
-          />
-          {errors.username && (
-            <FormError size="sm">{errors.username?.message}</FormError> // Displaying an error message if the username input is invalid
-          )}
-        </label>
-        <label>
-          <Text size="sm">Full Name</Text>{' '}
-          {/* Using a Text component from Ignite UI */}
-          <TextInput placeholder="Your name" {...register('name')} />
-          the register function to register the name input field
-          {errors.name && (
-            <FormError size="sm">{errors.name?.message}</FormError> // Displaying an error message if the name input is invalid
-          )}
-        </label>
-        <Button type="submit" disabled={isSubmitting}>
-          Next Step
-          <ArrowRight /> {/* Using an icon from Phosphor */}
-        </Button>
-      </Form>
-    </Container>
+        <Form as="form" onSubmit={handleSubmit(handleRegister)}>
+          <label>
+            <Text size="sm">Username</Text>{' '}
+            {/* Using a Text component from Ignite UI */}
+            <TextInput
+              prefix="alsystem.com/"
+              placeholder="your-username"
+              {...register('username')} // Using the register function to register the username input field
+            />
+            {errors.username && (
+              <FormError size="sm">{errors.username?.message}</FormError> // Displaying an error message if the username input is invalid
+            )}
+          </label>
+          <label>
+            <Text size="sm">Full Name</Text>{' '}
+            {/* Using a Text component from Ignite UI */}
+            <TextInput placeholder="Your name" {...register('name')} />
+            the register function to register the name input field
+            {errors.name && (
+              <FormError size="sm">{errors.name?.message}</FormError> // Displaying an error message if the name input is invalid
+            )}
+          </label>
+          <Button type="submit" disabled={isSubmitting}>
+            Next Step
+            <ArrowRight /> {/* Using an icon from Phosphor */}
+          </Button>
+        </Form>
+      </Container>
+    </>
   )
 }
